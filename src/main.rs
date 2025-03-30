@@ -73,9 +73,34 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let texts = std::fs::read_to_string(&text_path)?
         .split(".")
-        .flat_map(|str| str.split("?"))
-        .flat_map(|str| str.split("!"))
-        .map(|str| str.trim().to_string())
+        .map(|str| {
+            let mut res = str.trim().to_string();
+            res.push('.');
+            res
+        })
+        .flat_map(|s| {
+            s.split("?")
+                .map(|s| {
+                    let mut s = s.trim().to_string();
+                    if !s.ends_with('.') {
+                        s.push('?');
+                    }
+                    s
+                })
+                .collect::<Vec<String>>()
+        })
+        .flat_map(|s| {
+            s.split("!")
+                .map(|s| {
+                    let mut s = s.trim().to_string();
+
+                    if !s.ends_with('.') && !s.ends_with('?') {
+                        s.push('!');
+                    }
+                    s
+                })
+                .collect::<Vec<String>>()
+        })
         .collect::<Vec<String>>();
 
     let mut res: Res = Res::default();
