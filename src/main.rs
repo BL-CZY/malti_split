@@ -1,4 +1,4 @@
-use std::io::BufRead;
+use std::env;
 
 use hound::WavReader;
 use serde::Serialize;
@@ -65,12 +65,16 @@ struct Res {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let stdin = std::io::stdin();
-    let file_path = &stdin.lock().lines().next().unwrap().unwrap();
-    let text_path = &stdin.lock().lines().next().unwrap().unwrap();
+    let mut args = env::args();
+
+    args.next();
+    let file_path = args.next().unwrap();
+    let text_path = args.next().unwrap();
 
     let texts = std::fs::read_to_string(&text_path)?
         .split(".")
+        .flat_map(|str| str.split("?"))
+        .flat_map(|str| str.split("!"))
         .map(|str| str.trim().to_string())
         .collect::<Vec<String>>();
 
@@ -82,7 +86,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // - Silence threshold (adjust based on your audio characteristics)
     // - Minimum silence duration (1.5 seconds)
     let stops = detect_stops(
-        file_path, 1,   // Adjust this value based on your audio's characteristics
+        &file_path, 1,   // Adjust this value based on your audio's characteristics
         0.5, // 1.5 seconds of silence
     )?;
 
