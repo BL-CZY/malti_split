@@ -124,6 +124,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .collect();
 
+    for i in res.stops.len() - 1..1 {
+        res.stops[i].audio_stop = res.stops[i - 1].audio_stop;
+    }
+
+    res.stops[0].audio_stop = 0.0;
+
     println!("{}", serde_json::to_string(&res)?);
 
     Ok(())
